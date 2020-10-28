@@ -110,7 +110,7 @@ class Twilio
     protected function makeCall(TwilioCallMessage $message, $to)
     {
         $params = [
-            'url' => trim($message->content),
+            $message->contentType => trim($message->content),
         ];
 
         $this->fillOptionalParams($params, $message, [

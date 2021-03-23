@@ -16,6 +16,7 @@ use Twilio\Rest\Api\V2010\Account\CallList;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Twilio\Rest\Api\V2010\Account\MessageList;
 use Twilio\Rest\Client as TwilioService;
+use Twilio\TwiML\VoiceResponse;
 
 class IntegrationTest extends MockeryTestCase
 {
@@ -106,7 +107,7 @@ class IntegrationTest extends MockeryTestCase
     /** @test */
     public function it_can_make_a_call()
     {
-        $message = TwilioCallMessage::create('http://example.com');
+        $message = TwilioCallMessage::create()->url('http://example.com');
         $this->notification->shouldReceive('toTwilio')->andReturn($message);
 
         $config = new TwilioConfig([
@@ -117,6 +118,27 @@ class IntegrationTest extends MockeryTestCase
 
         $this->callWillBeSentToTwilioWith('+22222222222', '+31612345678', [
             'url' => 'http://example.com',
+        ]);
+
+        $channel->send(new NotifiableWithAttribute(), $this->notification);
+    }
+
+    /** @test */
+    public function it_can_make_a_twiml_call()
+    {
+        $voice_message = new VoiceResponse();
+        $voice_message->say('Message text');
+        $message = TwilioCallMessage::create()->twiml($voice_message);
+        $this->notification->shouldReceive('toTwilio')->andReturn($message);
+
+        $config = new TwilioConfig([
+            'from' => '+31612345678',
+        ]);
+        $twilio = new Twilio($this->twilioService, $config);
+        $channel = new TwilioChannel($twilio, $this->events);
+
+        $this->callWillBeSentToTwilioWith('+22222222222', '+31612345678', [
+            'twiml' => trim($message->content),
         ]);
 
         $channel->send(new NotifiableWithAttribute(), $this->notification);

@@ -192,7 +192,7 @@ class TwilioTest extends MockeryTestCase
     /** @test */
     public function it_can_send_a_call_to_twilio()
     {
-        $message = new TwilioCallMessage('http://example.com');
+        $message = (new TwilioCallMessage())->url('http://example.com');
         $message->from = '+2222222222';
         $message->status(TwilioCallMessage::STATUS_CANCELED);
         $message->method('PUT');
